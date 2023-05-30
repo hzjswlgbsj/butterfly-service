@@ -1,13 +1,10 @@
 import { Context } from "koa";
-import { getProvider, createProvider } from "../providers/websocketProvider";
+import { nanoid } from "nanoid";
 
-export async function initializeDocument(ctx: Context) {
-  const roomId = ctx.params.roomId;
-  let provider = getProvider(roomId);
-  if (!provider) {
-    provider = createProvider(roomId);
-  }
+export async function addDocument(ctx: Context) {
+  const guid = nanoid();
 
+  console.log("即将添加一篇文档", guid);
   // 返回房间ID给客户端或其他逻辑
-  ctx.body = { roomId };
+  return guid;
 }

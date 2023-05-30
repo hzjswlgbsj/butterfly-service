@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/app.ts",
+    "server": "HOST=localhost PORT=1234 npx y-websocket",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,6 +28,7 @@
     "yjs": "^13.6.1"
   },
   "devDependencies": {
-    "@types/koa": "^2.13.6"
+    "@types/koa": "^2.13.6",
+    "nanoid": "3.3.4"
   }
 }

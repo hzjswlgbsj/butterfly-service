@@ -1,24 +1,56 @@
 import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+import { WebsocketProvider as YWebsocketProvider } from "y-websocket"; // 这个包的类型有问题
+import { WEBSOCKET_URL } from "../config";
+import { OP } from "../types";
+const ws = require("ws");
 
-const providers: Record<string, WebsocketProvider> = {};
-const PORT = 3000; // 设置 WebSocket 服务器端口
+export default class WebsocketProvider {
+  roomId: string;
+  ydoc: Y.Doc;
+  provider: YWebsocketProvider;
+  todoUndoManager: Y.UndoManager;
+  operations: Y.Array<OP>;
 
-export function createProvider(roomId: string) {
-  const ydoc = new Y.Doc();
-  const provider = new WebsocketProvider(
-    `ws://localhost:${PORT}`,
-    roomId,
-    ydoc
-  );
-  providers[roomId] = provider;
-  return provider;
-}
+  constructor(roomId: string) {
+    this.roomId = roomId;
+    this.ydoc = new Y.Doc();
 
-export function getProvider(roomId: string) {
-  return providers[roomId];
-}
+    this.provider = new YWebsocketProvider(
+      WEBSOCKET_URL,
+      this.roomId,
+      this.ydoc,
+      {
+        WebSocketPolyfill: ws,
+      }
+    );
 
-export function removeProvider(roomId: string) {
-  delete providers[roomId];
+    this.operations = this.ydoc.getArray("doc-operations");
+    this.todoUndoManager = new Y.UndoManager(this.operations);
+    this.provider.on("synced", () => {
+      console.log(`房间${this.roomId}链接成功！`);
+    });
+  }
+
+  // 监听 todoItems 变化
+  onChange(
+    callback: (event: Y.YArrayEvent<OP>, transaction: Y.Transaction) => void
+  ) {
+    this.operations.observe(callback);
+  }
+
+  undo() {
+    this.todoUndoManager.undo();
+  }
+
+  redo() {
+    this.todoUndoManager.redo();
+  }
+
+  getTodoItems() {
+    return this.operations.toArray();
+  }
+
+  destroy() {
+    this.provider.disconnect();
+  }
 }
