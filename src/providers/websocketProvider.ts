@@ -24,7 +24,7 @@ export default class WebsocketProvider {
       }
     );
 
-    this.operations = this.ydoc.getArray("doc-operations");
+    this.operations = this.ydoc.getArray("operations");
     this.todoUndoManager = new Y.UndoManager(this.operations);
     this.provider.on("synced", () => {
       console.log(`房间${this.roomId}链接成功！`);
@@ -33,9 +33,9 @@ export default class WebsocketProvider {
 
   // 监听 todoItems 变化
   onChange(
-    callback: (event: Y.YArrayEvent<OP>, transaction: Y.Transaction) => void
+    callback: (event: Y.YEvent<any>[], transaction: Y.Transaction) => void
   ) {
-    this.operations.observe(callback);
+    this.operations.observeDeep(callback);
   }
 
   undo() {
