@@ -9,7 +9,7 @@ export default class WebsocketProvider {
   ydoc: Y.Doc;
   provider: YWebsocketProvider;
   todoUndoManager: Y.UndoManager;
-  operations: Y.Array<OP>;
+  operations: Y.XmlText;
 
   constructor(roomId: string) {
     this.roomId = roomId;
@@ -24,10 +24,11 @@ export default class WebsocketProvider {
       }
     );
 
-    this.operations = this.ydoc.getArray("operations");
+    // this.operations = this.ydoc.getArray("operations");
+    this.operations = this.ydoc.get("content", Y.XmlText) as Y.XmlText;
     this.todoUndoManager = new Y.UndoManager(this.operations);
     this.provider.on("synced", () => {
-      console.log(`房间${this.roomId}链接成功！`);
+      console.log(`房间${this.roomId}链接成功！`, this.operations);
     });
   }
 
@@ -47,7 +48,7 @@ export default class WebsocketProvider {
   }
 
   getTodoItems() {
-    return this.operations.toArray();
+    return this.operations;
   }
 
   destroy() {

@@ -13,13 +13,15 @@ class WebsocketProviderManager {
     const provider = new WebsocketProvider(roomId);
     this.add(roomId, provider);
 
-    provider.onChange((event: Y.YEvent<any>[], transaction: Y.Transaction) => {
-      console.log(
-        `收到房间 ${roomId} 的数据发生改变`,
-        event
-        // transaction
-      );
-    });
+    provider.onChange(
+      (event: Y.YEvent<Y.XmlText>[], transaction: Y.Transaction) => {
+        console.log(
+          `收到房间 ${roomId} 的数据发生改变`,
+          event
+          // transaction
+        );
+      }
+    );
 
     return provider;
   }
