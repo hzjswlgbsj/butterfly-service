@@ -1,6 +1,6 @@
 import * as Y from "yjs";
 import { WebsocketProvider as YWebsocketProvider } from "y-websocket"; // 这个包的类型有问题
-import { WEBSOCKET_URL } from "../config";
+import { WEBSOCKET_URL } from "../../config";
 import { OP } from "../types";
 const ws = require("ws");
 
@@ -28,7 +28,7 @@ export default class WebsocketProvider {
     this.operations = this.ydoc.get("content", Y.XmlText) as Y.XmlText;
     this.todoUndoManager = new Y.UndoManager(this.operations);
     this.provider.on("synced", () => {
-      console.log(`房间${this.roomId}链接成功！`, this.operations);
+      // console.log(`房间${this.roomId}链接成功！`, this.operations);
     });
   }
 

@@ -4,7 +4,7 @@
   "description": "butterfly service",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/app.ts",
+    "start": "ts-node app.ts",
     "server": "HOST=localhost PORT=1234 npx y-websocket",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

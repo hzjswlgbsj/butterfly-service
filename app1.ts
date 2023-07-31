@@ -1,9 +1,9 @@
 // app.ts
 import Koa from "koa";
 import http from "http";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./src/routes";
 import { PORT } from "./config";
-import { roomManager } from "./providers";
+import { roomManager } from "./src/providers";
 
 const app = new Koa();
 const server = http.createServer(app.callback());
