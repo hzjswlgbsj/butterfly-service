@@ -16,8 +16,8 @@ class WebsocketProviderManager {
     provider.onChange(
       (event: Y.YEvent<Y.XmlText>[], transaction: Y.Transaction) => {
         console.log(
-          `收到房间 ${roomId} 的数据发生改变`,
-          event
+          `收到房间 ${roomId} 的数据发生改变`
+          // event
           // transaction
         );
       }

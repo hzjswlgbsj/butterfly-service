@@ -1,8 +1,9 @@
+import Koa from "koa";
 const Router = require("koa-router");
 const requireDirectory = require("require-directory");
 
-class InitManager {
-  static initCore(app) {
+export default class InitManager {
+  static initCore(app: Koa) {
     // 入口方法
     InitManager.app = app;
     InitManager.initLoadRouters();
@@ -28,7 +29,7 @@ class InitManager {
   }
 
   static loadConfig(path = "") {
-    const configPath = path || `${process.cwd()}/config.js`;
+    const configPath = path || process.cwd() + "/config.js";
     const config = require(configPath);
     global.config = config;
   }
@@ -38,5 +39,3 @@ class InitManager {
     global.errs = errors;
   }
 }
-
-module.exports = InitManager;

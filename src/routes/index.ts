@@ -1,7 +1,6 @@
-// src/routes/index.ts
 import { Middleware, ParameterizedContext, Next } from "koa";
-import { entryRoom } from "../apis/RoomApi";
-import { addDocument } from "../apis/DocumentApi";
+import { entryRoom } from "../api/room";
+import { add } from "../api/file";
 
 interface Route {
   path: string;
@@ -13,7 +12,7 @@ interface Route {
 
 const routes: Route[] = [
   { path: "/room/entry", handler: entryRoom },
-  { path: "/document/add", handler: addDocument },
+  { path: "/file/add", handler: add },
   // 添加其他路由
 ];
 

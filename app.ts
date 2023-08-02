@@ -1,19 +1,19 @@
-const Koa = require("koa");
-const http = require("http");
-const InitManager = require("./core/init");
-const parser = require("koa-bodyparser");
-const cors = require("@koa/cors");
-const ratelimit = require("koa-ratelimit");
-require("module-alias/register");
+import Koa, { Context } from "koa";
+import http from "http";
+import parser from "koa-bodyparser";
+import cors from "@koa/cors";
+import ratelimit from "koa-ratelimit";
 import { registerRoutes } from "./src/routes";
-const catchError = require("./middlewares/exception");
+import catchError from "./middlewares/exception";
 import { roomManager } from "./src/providers";
 import { PORT } from "./config";
+import InitManager from "./core/init";
+import "module-alias/register";
 
 const app = new Koa();
 const server = http.createServer(app.callback());
 
-app.use(async (ctx: any, next: any) => {
+app.use(async (ctx: Context, next: any) => {
   ctx.set("Access-Control-Allow-Origin", "*");
   ctx.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   ctx.set("Access-Control-Allow-Headers", "Content-Type");
@@ -34,7 +34,7 @@ app.use(
     db: db,
     duration: 60000,
     errorMessage: "Sometimes You Just Have to Slow Down.",
-    id: (ctx) => ctx.ip,
+    id: (ctx: Context) => ctx.ip,
     headers: {
       remaining: "Rate-Limit-Remaining",
       reset: "Rate-Limit-Reset",
@@ -42,10 +42,10 @@ app.use(
     },
     max: 100,
     disableHeader: false,
-    whitelist: (ctx) => {
+    whitelist: (ctx: Context) => {
       // some logic that returns a boolean
     },
-    blacklist: (ctx) => {
+    blacklist: (ctx: Context) => {
       // some logic that returns a boolean
     },
   })
@@ -55,9 +55,9 @@ app.use(
 roomManager.createProvider("gay42g6xx2f528nx4c");
 
 // 注册路由
-// registerRoutes(app);
-
 InitManager.initCore(app);
+
+// registerRoutes(app);
 
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

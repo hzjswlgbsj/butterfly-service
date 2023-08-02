@@ -1,15 +1,22 @@
-const validator = require("validator");
+import { Context } from "koa";
+import { DummyObject } from "../types";
+import validator from "validator";
 const { ParameterException } = require("./http-exception");
 const { get, last, set, cloneDeep } = require("lodash");
 const { findMembers } = require("./util");
 
-class LinValidator {
+export class LinValidator {
+  public data: DummyObject;
+  public parsed: DummyObject;
+  public alias: DummyObject;
+
   constructor() {
     this.data = {};
     this.parsed = {};
+    this.alias = {};
   }
 
-  _assembleAllParams(ctx) {
+  _assembleAllParams(ctx: Context) {
     return {
       body: ctx.request.body,
       query: ctx.request.query,
@@ -18,7 +25,7 @@ class LinValidator {
     };
   }
 
-  get(path, parsed = true) {
+  get(path: string, parsed: boolean = true) {
     if (parsed) {
       const value = get(this.parsed, path, null);
       if (value == null) {
@@ -32,12 +39,12 @@ class LinValidator {
     }
   }
 
-  _findMembersFilter(key) {
+  _findMembersFilter(key: string) {
     if (/validate([A-Z])\w+/g.test(key)) {
       return true;
     }
-    if (this[key] instanceof Array) {
-      this[key].forEach((value) => {
+    if ((this as any)[key] instanceof Array) {
+      (this as any)[key].forEach((value: Rule | unknown) => {
         const isRuleType = value instanceof Rule;
         if (!isRuleType) {
           throw new Error("验证数组必须全部为Rule类型");
@@ -48,7 +55,7 @@ class LinValidator {
     return false;
   }
 
-  async validate(ctx, alias = {}) {
+  async validate(ctx: Context, alias = {}) {
     this.alias = alias;
     let params = this._assembleAllParams(ctx);
     this.data = cloneDeep(params);
@@ -76,14 +83,14 @@ class LinValidator {
     return this;
   }
 
-  async _check(key, alias = {}) {
-    const isCustomFunc = typeof this[key] == "function" ? true : false;
-    let result;
+  async _check(key: string, alias: DummyObject = {}) {
+    const isCustomFunc = typeof (this as any)[key] == "function" ? true : false;
+    let result: DummyObject;
     if (isCustomFunc) {
       try {
-        await this[key](this.data);
+        await (this as any)[key](this.data);
         result = new RuleResult(true);
-      } catch (error) {
+      } catch (error: any) {
         result = new RuleResult(
           false,
           error.msg || error.message || "参数错误"
@@ -92,7 +99,7 @@ class LinValidator {
       // 函数验证
     } else {
       // 属性验证, 数组，内有一组Rule
-      const rules = this[key];
+      const rules = (this as any)[key];
       const ruleField = new RuleField(rules);
       // 别名替换
       key = alias[key] ? alias[key] : key;
@@ -122,7 +129,7 @@ class LinValidator {
     };
   }
 
-  _findParam(key) {
+  _findParam(key: string) {
     let value;
     value = get(this.data, ["query", key]);
     if (value) {
@@ -159,24 +166,14 @@ class LinValidator {
   }
 }
 
-class RuleResult {
-  constructor(pass, msg = "") {
-    Object.assign(this, {
-      pass,
-      msg,
-    });
-  }
-}
+export class Rule {
+  public name: string = "";
+  public msg: string = "";
+  public message: string = "";
+  public params: DummyObject[];
 
-class RuleFieldResult extends RuleResult {
-  constructor(pass, msg = "", legalValue = null) {
-    super(pass, msg);
-    this.legalValue = legalValue;
-  }
-}
-
-class Rule {
-  constructor(name, msg, ...params) {
+  constructor(name: string, msg: string, ...params: DummyObject[]) {
+    this.params = [];
     Object.assign(this, {
       name,
       msg,
@@ -184,7 +181,7 @@ class Rule {
     });
   }
 
-  validate(field) {
+  validate(field: string) {
     if (this.name == "isOptional") return new RuleResult(true);
     if (!validator[this.name](field + "", ...this.params)) {
       return new RuleResult(false, this.msg || this.message || "参数错误");
@@ -193,12 +190,31 @@ class Rule {
   }
 }
 
-class RuleField {
-  constructor(rules) {
+export class RuleResult implements DummyObject {
+  constructor(pass: boolean, msg: string = "") {
+    Object.assign(this, {
+      pass,
+      msg,
+    });
+  }
+}
+
+export class RuleFieldResult extends RuleResult {
+  public legalValue: any;
+  constructor(pass: boolean, msg: string = "", legalValue = null) {
+    super(pass, msg);
+    this.legalValue = legalValue;
+  }
+}
+
+export class RuleField {
+  public rules: any[];
+
+  constructor(rules: any[]) {
     this.rules = rules;
   }
 
-  validate(field) {
+  validate(field: string) {
     if (field == null) {
       // 如果字段为空
       const allowEmpty = this._allowEmpty();
@@ -223,7 +239,7 @@ class RuleField {
     return new RuleFieldResult(true, "", this._convert(field));
   }
 
-  _convert(value) {
+  _convert(value: any) {
     for (let rule of this.rules) {
       if (rule.name == "isInt") {
         return parseInt(value);
@@ -256,8 +272,3 @@ class RuleField {
     }
   }
 }
-
-module.exports = {
-  Rule,
-  LinValidator,
-};
