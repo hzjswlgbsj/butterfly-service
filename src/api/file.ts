@@ -1,28 +1,21 @@
-// import { Context } from "koa";
-// import { nanoid } from "nanoid";
-
-// export async function add(ctx: Context) {
-//   const guid = nanoid();
-
-//   console.log("即将添加一篇文档", guid);
-//   // 返回房间ID给客户端或其他逻辑
-//   ctx.body = { guid };
-// }
-
 import { Context } from "koa";
 import Router from "koa-router";
 import { ArticleValidator } from "../validators/file";
 import { nanoid } from "nanoid";
-const { Auth } = require("../../../middlewares/auth");
-const { ArticleDao } = require("../../dao/article");
-const { CommentDao } = require("../../dao/comment");
-const { Resolve } = require("../../lib/helper");
-const res = new Resolve();
+import { Auth } from "../../middlewares/auth";
+// import { ArticleDao } from "../../dao/article";
+// import { CommentDao } from "../../dao/comment";
+// import { Resolve } from "../../lib/helper";
+
+// const res = new Resolve();
+const router = new Router({
+  prefix: "/file",
+});
 
 const AUTH_ADMIN = 16;
 
-const router = new Router({
-  prefix: "/file",
+router.get("/test", (ctx: Context) => {
+  ctx.body = "Hello, world!";
 });
 
 /**
@@ -30,6 +23,8 @@ const router = new Router({
  */
 router.post("/add", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
   const guid = nanoid();
+  ctx.body = guid;
+
   console.log("添加一篇文档", guid);
   // 通过验证器校验参数是否通过
   // const v = await new ArticleValidator().validate(ctx);
@@ -43,4 +38,5 @@ router.post("/add", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
   //   ctx.body = res.fail(err);
   // }
 });
-module.exports = router;
+console.log(11111111111111, router);
+export default router;

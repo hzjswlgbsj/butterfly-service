@@ -21,7 +21,9 @@
   "homepage": "https://github.com/hzjswlgbsj/butterfly-service#readme",
   "dependencies": {
     "@koa/cors": "^4.0.0",
+    "basic-auth": "^2.0.1",
     "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.1",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
     "koa-ratelimit": "^5.0.1",
@@ -34,6 +36,8 @@
     "yjs": "^13.6.1"
   },
   "devDependencies": {
+    "@types/basic-auth": "^1.1.3",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/koa": "^2.13.6",
     "@types/koa-bodyparser": "^5.0.1",
     "@types/koa-ratelimit": "^5.0.1",

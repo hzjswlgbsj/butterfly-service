@@ -1,41 +1,39 @@
 import Koa from "koa";
-const Router = require("koa-router");
-const requireDirectory = require("require-directory");
+import Router from "koa-router";
+import requireDirectory from "./require-directory";
 
 export default class InitManager {
-  static initCore(app: Koa) {
-    // 入口方法
+  static app: Koa;
+
+  static async initCore(app: Koa) {
     InitManager.app = app;
-    InitManager.initLoadRouters();
+    await InitManager.initLoadRouters();
     InitManager.loadHttpException();
     InitManager.loadConfig();
   }
 
-  // 加载全部路由
-  static initLoadRouters() {
-    // 绝对路径
+  // Load all routers
+  static async initLoadRouters() {
+    // Absolute path to the 'api' directory
     const apiDirectory = `${process.cwd()}/src/api`;
-    // 路由自动加载
-    requireDirectory(module, apiDirectory, {
-      visit: whenLoadModule,
+    await requireDirectory(apiDirectory, {
+      visit: (router: Router) => {
+        if (router instanceof Router) {
+          InitManager.app.use(router.routes());
+          InitManager.app.use(router.allowedMethods());
+        }
+      },
     });
-
-    // 判断 requireDirectory 加载的模块是否为路由
-    function whenLoadModule(obj) {
-      if (obj instanceof Router) {
-        InitManager.app.use(obj.routes());
-      }
-    }
   }
 
-  static loadConfig(path = "") {
-    const configPath = path || process.cwd() + "/config.js";
+  static loadConfig(path: string = "") {
+    const configPath = path || `${process.cwd()}/config`;
     const config = require(configPath);
-    global.config = config;
+    (global as any).config = config;
   }
 
   static loadHttpException() {
     const errors = require("./http-exception");
-    global.errs = errors;
+    (global as any).errs = errors;
   }
 }

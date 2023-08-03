@@ -3,13 +3,11 @@ import http from "http";
 import parser from "koa-bodyparser";
 import cors from "@koa/cors";
 import ratelimit from "koa-ratelimit";
-import { registerRoutes } from "./src/routes";
 import catchError from "./middlewares/exception";
 import { roomManager } from "./src/providers";
 import { PORT } from "./config";
 import InitManager from "./core/init";
 import "module-alias/register";
-
 const app = new Koa();
 const server = http.createServer(app.callback());
 
@@ -42,12 +40,12 @@ app.use(
     },
     max: 100,
     disableHeader: false,
-    whitelist: (ctx: Context) => {
-      // some logic that returns a boolean
-    },
-    blacklist: (ctx: Context) => {
-      // some logic that returns a boolean
-    },
+    // whitelist: (ctx: Context) => {
+    //   // some logic that returns a boolean
+    // },
+    // blacklist: (ctx: Context) => {
+    //   // some logic that returns a boolean
+    // },
   })
 );
 
@@ -56,8 +54,6 @@ roomManager.createProvider("gay42g6xx2f528nx4c");
 
 // 注册路由
 InitManager.initCore(app);
-
-// registerRoutes(app);
 
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
