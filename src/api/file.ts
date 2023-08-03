@@ -14,14 +14,16 @@ const router = new Router({
 
 const AUTH_ADMIN = 16;
 
-router.get("/test", (ctx: Context) => {
+router.get("/bb", (ctx: Context) => {
   ctx.body = "Hello, world!";
 });
 
 /**
  * 创建文章
  */
-router.post("/add", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
+// router.post("/add", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
+// 先不校验token
+router.post("/add", async (ctx: Context) => {
   const guid = nanoid();
   ctx.body = guid;
 
@@ -38,5 +40,4 @@ router.post("/add", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
   //   ctx.body = res.fail(err);
   // }
 });
-console.log(11111111111111, router);
 export default router;
