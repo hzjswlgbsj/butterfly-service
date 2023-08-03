@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
-
-const { dbName, host, port, user, password } = require("../config").database;
+import { ENV } from "../config";
+const { dbName, host, port, user, password } = ENV.database;
 
 const sequelize = new Sequelize(dbName, user, password, {
   dialect: "mysql",
@@ -38,10 +38,10 @@ sequelize.sync({ force: false });
 
 sequelize
   .authenticate()
-  .then((res) => {
+  .then(() => {
     console.log("Connection has been established successfully.");
   })
-  .catch((err) => {
+  .catch((err: any) => {
     console.error("Unable to connect to the database:", err);
   });
 

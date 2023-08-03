@@ -1,6 +1,6 @@
 import { Rule, LinValidator } from "../../core/lin-validator-v2";
 
-export class ArticleValidator extends LinValidator {
+export default class FileValidator extends LinValidator {
   public name: Rule[];
   constructor() {
     super();

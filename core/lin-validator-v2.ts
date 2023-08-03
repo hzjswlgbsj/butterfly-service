@@ -183,7 +183,7 @@ export class Rule {
 
   validate(field: string) {
     if (this.name == "isOptional") return new RuleResult(true);
-    if (!validator[this.name](field + "", ...this.params)) {
+    if (!(validator as any)[this.name](field + "", ...this.params)) {
       return new RuleResult(false, this.msg || this.message || "参数错误");
     }
     return new RuleResult(true, "");
@@ -201,6 +201,8 @@ export class RuleResult implements DummyObject {
 
 export class RuleFieldResult extends RuleResult {
   public legalValue: any;
+  public msg?: string;
+
   constructor(pass: boolean, msg: string = "", legalValue = null) {
     super(pass, msg);
     this.legalValue = legalValue;
