@@ -51,6 +51,4 @@ sequelize
 //   console.log('CREATE DATABASE FAIL!', err)
 // })
 
-module.exports = {
-  sequelize,
-};
+export default sequelize;

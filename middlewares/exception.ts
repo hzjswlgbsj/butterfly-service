@@ -5,6 +5,7 @@ const catchError = async (ctx: Context, next: any) => {
   try {
     await next();
   } catch (error) {
+    console.log("发生错误", error);
     // 开发环境
     const isHttpException = error instanceof HttpException;
     const isDev = (global as any).config.environment === "dev";

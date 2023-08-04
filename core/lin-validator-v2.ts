@@ -1,9 +1,9 @@
 import { Context } from "koa";
 import { DummyObject } from "../types";
 import validator from "validator";
-const { ParameterException } = require("./http-exception");
-const { get, last, set, cloneDeep } = require("lodash");
-const { findMembers } = require("./util");
+import { ParameterException } from "./http-exception";
+import { get, last, set, cloneDeep } from "lodash";
+import { findMembers } from "./util";
 
 export class LinValidator {
   public data: DummyObject;
@@ -28,9 +28,10 @@ export class LinValidator {
   get(path: string, parsed: boolean = true) {
     if (parsed) {
       const value = get(this.parsed, path, null);
-      if (value == null) {
+
+      if (!value) {
         const keys = path.split(".");
-        const key = last(keys);
+        const key = last(keys) as any;
         return get(this.parsed.default, key);
       }
       return value;

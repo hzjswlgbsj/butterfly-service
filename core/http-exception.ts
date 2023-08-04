@@ -1,7 +1,7 @@
 export class HttpException extends Error {
   public code: number;
   public errorCode: number;
-  public msg: string;
+  public msg: string | string[];
 
   constructor(msg = "服务器异常", errorCode = 10000, code = 400) {
     super();
@@ -12,7 +12,7 @@ export class HttpException extends Error {
 }
 
 export class ParameterException extends HttpException {
-  constructor(msg: string, errorCode: number) {
+  constructor(msg: string[], errorCode?: number) {
     super();
     this.code = 400;
     this.msg = msg || "参数错误";

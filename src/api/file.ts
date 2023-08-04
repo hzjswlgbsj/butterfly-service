@@ -20,7 +20,10 @@ const AUTH_ADMIN = 16;
 // 先不校验token
 router.post("/add", async (ctx: Context) => {
   const guid = nanoid();
-  ctx.body = guid;
+  if (!ctx.request.body) {
+    ctx.request.body = {};
+  }
+  (ctx.request.body as any).guid = guid;
 
   // 通过验证器校验参数是否通过
   const v = await new FileValidator().validate(ctx);

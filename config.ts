@@ -4,7 +4,7 @@ export const WEBSOCKET_URL = "ws://localhost:1234";
 export const ENV = {
   environment: "dev",
   database: {
-    dbName: "sixty",
+    dbName: "butterfly",
     host: "localhost",
     port: 3306,
     user: "root",
