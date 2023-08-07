@@ -1,5 +1,6 @@
 import { LinValidator } from "../../core/lin-validator-v2";
 import FileModel from "../models/file";
+import { FileGetReq } from "../types/api";
 import { setParam } from "../util";
 
 // 定义文件模型
@@ -58,6 +59,53 @@ export default class FileDao {
     try {
       const res = await file.update(fields);
       return [null, res];
+    } catch (err) {
+      return [err, null];
+    }
+  }
+
+  static async get(params: FileGetReq) {
+    const { id, type, limit = 10, page = 1 } = params;
+
+    // 筛选方式
+    const filter: FileGetReq = {};
+
+    // 筛选方式：指定id
+    if (id) {
+      filter.id = id;
+    }
+
+    // 筛选方式：文件类型
+    if (type) {
+      filter.type = type;
+    }
+
+    try {
+      const file = await FileModel.findAndCountAll({
+        limit,
+        offset: (page - 1) * limit,
+        where: {
+          ...filter,
+          deleted_at: null,
+        },
+        order: [["created_at", "DESC"]],
+      });
+
+      let rows = file.rows;
+
+      const data = {
+        data: rows,
+        // 分页信息
+        meta: {
+          current_page: page,
+          per_page: limit,
+          count: file.count,
+          total: file.count,
+          total_pages: Math.ceil(file.count / limit),
+        },
+      };
+
+      return [null, data];
     } catch (err) {
       return [err, null];
     }

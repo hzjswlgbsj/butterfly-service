@@ -27,7 +27,7 @@ export default class WebsocketProvider {
     this.operations = this.ydoc.get("content", Y.XmlText) as Y.XmlText;
     this.todoUndoManager = new Y.UndoManager(this.operations);
     this.provider.on("synced", () => {
-      console.log(`房间${this.roomId}链接成功！`, this.operations);
+      // console.log(`房间${this.roomId}链接成功！`, this.operations);
     });
   }
 

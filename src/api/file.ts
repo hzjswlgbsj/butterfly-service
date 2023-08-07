@@ -8,6 +8,8 @@ import { nanoid } from "nanoid";
 import { Auth } from "../../middlewares/auth";
 import FileDao from "../dao/file";
 import Resolve from "../lib/helper";
+import { FileGetReq } from "../types/api";
+import { LinValidator } from "../../core/lin-validator-v2";
 
 const res = new Resolve();
 const router = new Router({
@@ -45,7 +47,7 @@ router.post("/add", async (ctx: Context) => {
  * 更新文件内容
  */
 // router.post("/update", new Auth(AUTH_ADMIN).m, async (ctx) => {
-router.post("/update", async (ctx) => {
+router.post("/update", async (ctx: Context) => {
   // 通过验证器校验参数是否通过
   const v = await new PositiveIdParamsValidator().validate(ctx);
 
@@ -57,6 +59,43 @@ router.post("/update", async (ctx) => {
   if (!err) {
     ctx.response.status = 200;
     ctx.body = res.success("更新文章成功");
+  } else {
+    ctx.body = res.fail(err);
+  }
+});
+
+/**
+ * 获取文件列表
+ */
+// router.post("/get", new Auth(AUTH_ADMIN).m, async (ctx) => {
+router.post("/get", async (ctx: Context) => {
+  const v = await new LinValidator().validate(ctx);
+
+  const filter: FileGetReq = {};
+
+  const id = v.get("body.id");
+  const type = v.get("body.type");
+  const page = v.get("body.page");
+  const limit = v.get("body.limit");
+
+  if (id) {
+    filter.id = id;
+  }
+  if (type) {
+    filter.type = type;
+  }
+  if (page) {
+    filter.page = page;
+  }
+  if (limit) {
+    filter.limit = limit;
+  }
+
+  // 更新文章
+  const [err, data] = await FileDao.get(filter);
+  if (!err) {
+    ctx.response.status = 200;
+    ctx.body = res.json(data);
   } else {
     ctx.body = res.fail(err);
   }
