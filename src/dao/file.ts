@@ -18,7 +18,7 @@ export default class FileDao {
     }
 
     // 创建文章
-    const file = new FileModel();
+    const file = FileModel.build();
     const keys: string[] = ["name", "guid", "content", "type"];
     setParam(file, v, keys);
     try {
@@ -26,6 +26,39 @@ export default class FileDao {
       return [null, res];
     } catch (err: unknown) {
       console.log(err);
+      return [err, null];
+    }
+  }
+  /**
+   *
+   * @param id 文件的id
+   * @param v 参数对象
+   * @returns
+   */
+  static async update(id: number, v: LinValidator): Promise<[unknown, any]> {
+    // 查询文章
+    const file: any = await FileModel.findOne({ where: { id } });
+
+    if (!file) {
+      throw new (global as any).errs.NotFound("没有找到相关文件");
+    }
+
+    const name = v.get("body.name");
+    const content = v.get("body.content");
+    const fields: any = {};
+
+    if (name) {
+      fields.name = name;
+    }
+
+    if (content) {
+      fields.content = content;
+    }
+
+    try {
+      const res = await file.update(fields);
+      return [null, res];
+    } catch (err) {
       return [err, null];
     }
   }

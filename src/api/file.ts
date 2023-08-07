@@ -1,8 +1,11 @@
 import { Context } from "koa";
 import Router from "koa-router";
-import FileValidator from "../validators/file";
+import {
+  FileAddValidator,
+  PositiveIdParamsValidator,
+} from "../validators/file";
 import { nanoid } from "nanoid";
-// import { Auth } from "../../middlewares/auth";
+import { Auth } from "../../middlewares/auth";
 import FileDao from "../dao/file";
 import Resolve from "../lib/helper";
 
@@ -26,7 +29,7 @@ router.post("/add", async (ctx: Context) => {
   (ctx.request.body as any).guid = guid;
 
   // 通过验证器校验参数是否通过
-  const v = await new FileValidator().validate(ctx);
+  const v = await new FileAddValidator().validate(ctx);
   // 创建文章
   const [err, data] = await FileDao.add(v);
   if (!err) {
@@ -37,4 +40,26 @@ router.post("/add", async (ctx: Context) => {
     ctx.body = res.fail(err);
   }
 });
+
+/**
+ * 更新文件内容
+ */
+// router.post("/update", new Auth(AUTH_ADMIN).m, async (ctx) => {
+router.post("/update", async (ctx) => {
+  // 通过验证器校验参数是否通过
+  const v = await new PositiveIdParamsValidator().validate(ctx);
+
+  // 获取文章ID参数
+  const id = v.get("body.id");
+
+  // 更新文章
+  const [err, data] = await FileDao.update(id, v);
+  if (!err) {
+    ctx.response.status = 200;
+    ctx.body = res.success("更新文章成功");
+  } else {
+    ctx.body = res.fail(err);
+  }
+});
+
 export default router;
