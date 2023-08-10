@@ -1,6 +1,6 @@
 import { LinValidator } from "../../core/lin-validator-v2";
 import FileModel from "../models/file";
-import { FileGetReq } from "../types/api";
+import { FileEditParams, FileEditReq, FileGetReq } from "../types/api";
 import { setParam } from "../util";
 
 // 定义文件模型
@@ -32,28 +32,32 @@ export default class FileDao {
   }
   /**
    *
-   * @param id 文件的id
-   * @param v 参数对象
+   * @params id FileEditParams
    * @returns
    */
-  static async update(id: number, v: LinValidator): Promise<[unknown, any]> {
+  static async update(params: FileEditParams): Promise<[unknown, any]> {
     // 查询文章
-    const file: any = await FileModel.findOne({ where: { id } });
+    let file: any;
+    if (params.id) {
+      file = await FileModel.findOne({ where: { id: params.id } });
+    }
+
+    if (params.guid) {
+      file = await FileModel.findOne({ where: { guid: params.guid } });
+    }
 
     if (!file) {
       throw new (global as any).errs.NotFound("没有找到相关文件");
     }
 
-    const name = v.get("body.name");
-    const content = v.get("body.content");
-    const fields: any = {};
+    const fields: FileEditReq = {};
 
-    if (name) {
-      fields.name = name;
+    if (params.name) {
+      fields.name = params.name;
     }
 
-    if (content) {
-      fields.content = content;
+    if (params.content) {
+      fields.content = params.content;
     }
 
     try {
