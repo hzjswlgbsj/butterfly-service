@@ -4,21 +4,21 @@ import sequelize from "../../core/db";
 
 // 定义文件模型
 class FileModel extends Model {
-  public name: string = "";
-  public type: string = "";
-  public guid: string = "";
-  public content: string = "";
+  // public name: string = "";
+  // public type: string = "";
+  // public guid: string = "";
+  // public content: string = "";
 }
 
 // 初始文章模型
 FileModel.init(
   {
-    // id: {
-    //   type: DataTypes.INTEGER().UNSIGNED,
-    //   primaryKey: true,
-    //   autoIncrement: true,
-    //   comment: "文件主键ID",
-    // },
+    id: {
+      type: DataTypes.INTEGER().UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+      comment: "文件主键ID",
+    },
     name: {
       type: DataTypes.STRING(128),
       allowNull: false,

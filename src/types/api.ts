@@ -9,6 +9,7 @@ export interface FileEditReq {
 }
 export interface FileGetReq {
   id?: number;
+  guid?: string;
   type?: string;
   page?: number;
   limit?: number;

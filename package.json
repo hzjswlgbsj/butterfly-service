@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node-dev app.ts",
     "pm2": "pm2 start app.ts --interpreter=./node_modules/.bin/ts-node",
-    "server": "HOST=127.0.0.0 PORT=1234 npx y-websocket",
+    "server": "HOST=localhost PORT=1234 npx y-websocket",
     "deploy": "HOST=0.0.0.0 PORT=1234 npx y-websocket",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

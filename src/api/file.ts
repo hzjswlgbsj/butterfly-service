@@ -93,16 +93,42 @@ export async function update(ctx: Context) {
 /**
  * 获取文件列表
  */
-export async function get(ctx: Context) {
+export async function getFiles(filter: FileGetReq) {
+  // 更新文章
+  const [err, data] = await FileDao.get(filter);
+  if (!err) {
+    return {
+      code: 200,
+      msg: "获取文章成功",
+      errorCode: 0,
+      data,
+    };
+  } else {
+    return {
+      code: -1,
+      msg: err,
+      errorCode: 1,
+      data,
+    };
+  }
+}
+/**
+ * 获取文件列表
+ */
+export async function list(ctx: Context) {
   const v = await new LinValidator().validate(ctx);
 
   const filter: FileGetReq = {};
 
   const id = v.get("body.id");
+  const guid = v.get("body.guid");
   const type = v.get("body.type");
   const page = v.get("body.page");
   const limit = v.get("body.limit");
 
+  if (guid) {
+    filter.guid = guid;
+  }
   if (id) {
     filter.id = id;
   }
@@ -128,6 +154,6 @@ export async function get(ctx: Context) {
 
 router.post("/add", /*new Auth(AUTH_ADMIN).m,*/ add);
 router.post("/update", /*new Auth(AUTH_ADMIN).m,*/ update);
-router.post("/get", /*new Auth(AUTH_ADMIN).m,*/ get);
+router.post("/list", /*new Auth(AUTH_ADMIN).m,*/ list);
 
 export default router;

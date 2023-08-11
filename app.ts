@@ -50,7 +50,7 @@ app.use(
 );
 
 // 创建测试房间（目前从前端复制写死的）
-roomManager.createProvider("gay42g6xx2f528nx4c");
+roomManager.createProvider("pp9RwFCDa0yqfsMBE4SsA");
 
 // 注册路由
 InitManager.initCore(app);

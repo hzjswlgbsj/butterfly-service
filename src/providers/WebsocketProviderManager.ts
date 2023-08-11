@@ -1,7 +1,7 @@
 import * as Y from "yjs";
 import WebsocketProvider from "./WebsocketProvider";
 import { fromUint8Array, toUint8Array } from "js-base64";
-
+import { getFiles } from "../api/file";
 /**
  * TODO:
  * 这里对y - websocket的实例进行了管理，因为使用yjs无法绕开解决冲入需要加载全量数据的问题
@@ -19,11 +19,12 @@ class WebsocketProviderManager {
     this.providers = new Map();
   }
 
-  public createProvider(roomId: string) {
+  public async createProvider(roomId: string) {
     let provider = this.providers.get(roomId);
+
     if (!provider) {
       provider = new WebsocketProvider(roomId);
-      this.add(roomId, provider);
+      await this.add(roomId, provider);
 
       // TODO:
       // 这里会比较频繁的被触发，不可能实时的保存到数据库中去，这里除了简单
@@ -44,13 +45,6 @@ class WebsocketProviderManager {
 
           // Transform Uint8Array to a Base64-String
           const base64Encoded = fromUint8Array(documentState);
-
-          // Transform Base64-String back to an Uint8Array
-          // const binaryEncoded = toUint8Array(base64Encoded);
-
-          // Applies Uint8Array data to document
-          // Y.applyUpdateV2(ydoc, binaryEncoded);
-
           provider!.saveToDb(roomId, base64Encoded);
         }
       );
@@ -67,17 +61,30 @@ class WebsocketProviderManager {
     return this.providers.get(roomId);
   }
 
-  public add(roomId: string, provider: WebsocketProvider) {
+  public async add(roomId: string, provider: WebsocketProvider) {
     if (!roomId) {
       throw new Error("错误的房间号");
     }
 
-    const room = this.providers.get(roomId);
-
-    if (room) {
+    if (this.providers.has(roomId)) {
+      const room = this.providers.get(roomId);
       console.log(`房间${roomId}已存在`, room);
       return room;
     } else {
+      // 如果不存在那需要去数据库中获取文档的内容
+      const res = await getFiles({
+        guid: roomId,
+      });
+
+      if (res.data.data && res.data.data.length) {
+        const base64Encoded = res.data.data[0].dataValues.content;
+        // Transform Base64-String back to an Uint8Array
+        const binaryEncoded = toUint8Array(base64Encoded);
+
+        // Applies Uint8Array data to document
+        Y.applyUpdate(provider.ydoc, binaryEncoded);
+      }
+
       this.providers.set(roomId, provider);
       return provider;
     }

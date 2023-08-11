@@ -68,12 +68,16 @@ export default class FileDao {
     }
   }
 
-  static async get(params: FileGetReq) {
-    const { id, type, limit = 10, page = 1 } = params;
+  static async get(params: FileGetReq): Promise<[any, any]> {
+    const { id, guid, type, limit = 10, page = 1 } = params;
 
     // 筛选方式
     const filter: FileGetReq = {};
 
+    // 筛选方式：指定guid
+    if (guid) {
+      filter.guid = guid;
+    }
     // 筛选方式：指定id
     if (id) {
       filter.id = id;
@@ -85,17 +89,24 @@ export default class FileDao {
     }
 
     try {
-      const file = await FileModel.findAndCountAll({
+      const { count, rows } = await FileModel.findAndCountAll({
         limit,
         offset: (page - 1) * limit,
         where: {
           ...filter,
           deleted_at: null,
         },
+        // attributes: [
+        //   "id",
+        //   "name",
+        //   "type",
+        //   "content",
+        //   "guid",
+        //   "created_at",
+        //   "updated_at",
+        // ],
         order: [["created_at", "DESC"]],
       });
-
-      let rows = file.rows;
 
       const data = {
         data: rows,
@@ -103,15 +114,14 @@ export default class FileDao {
         meta: {
           current_page: page,
           per_page: limit,
-          count: file.count,
-          total: file.count,
-          total_pages: Math.ceil(file.count / limit),
+          total: count,
+          total_pages: Math.ceil(count / limit),
         },
       };
 
       return [null, data];
     } catch (err) {
-      return [err, null];
+      return [err, {}];
     }
   }
 }
