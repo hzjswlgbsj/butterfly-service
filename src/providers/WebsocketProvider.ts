@@ -25,17 +25,18 @@ export default class WebsocketProvider {
     this.provider.on("synced", (data: any) => {
       console.log(`房间${roomId}链接成功！`, data);
     });
-
-    this.provider.on("sync", (data: any) => {
-      console.log(`房间${roomId}信息同步成功！`, data);
-    });
   }
 
   // 监听变化
   onChange(
-    callback: (event: Y.YEvent<any>[], transaction: Y.Transaction) => void
+    callback: (
+      update: Uint8Array,
+      origin: any,
+      doc: Y.Doc,
+      tr: Y.Transaction
+    ) => void
   ) {
-    this.operations.observeDeep(callback);
+    this.provider.doc.on("update", callback);
   }
 
   async saveToDb(roomId: string, ydocJson: string) {

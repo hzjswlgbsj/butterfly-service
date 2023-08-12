@@ -33,18 +33,20 @@ class WebsocketProviderManager {
       // 1.yjs是全量数据，即使一个新的用户进入后，也会通过y-websocket拿到最新的数据
       // 2.当并发协同文档数量大的时候内存压力非常大
       provider.onChange(
-        (event: Y.YEvent<Y.XmlText>[], transaction: Y.Transaction) => {
+        (update: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
           console.log(
-            `收到房间 ${roomId} 的数据发生改变`
-            // event
-            // transaction
+            `收到房间 ${roomId} 的数据发生改变`,
+            // update,
+            origin,
+            doc
+            // tr
           );
 
-          // 将数据转化为base64后持久化，https://docs.yjs.dev/api/document-updates#example-base64-encoding
-          const documentState = Y.encodeStateAsUpdate(provider!.ydoc); // is a Uint8Array
+          // origin参数，如果本次操作是自己产生的它的值是一个Symbol(slate-yjs-operation)，如果是接收到其他客户端的值
+          // 那它的值是改变产生的那个客户端的 WebsocketProvider实例
 
           // Transform Uint8Array to a Base64-String
-          const base64Encoded = fromUint8Array(documentState);
+          const base64Encoded = fromUint8Array(update);
           provider!.saveToDb(roomId, base64Encoded);
         }
       );
