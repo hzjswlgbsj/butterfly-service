@@ -49,11 +49,11 @@ app.use(
   })
 );
 
-// 创建测试房间（目前从前端复制写死的）
-roomManager.createProvider("pp9RwFCDa0yqfsMBE4SsA");
-
 // 注册路由
 InitManager.initCore(app);
+
+// 清空 providers 缓存
+roomManager.clear();
 
 server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

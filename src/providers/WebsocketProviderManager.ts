@@ -20,39 +20,45 @@ class WebsocketProviderManager {
   }
 
   public async createProvider(roomId: string) {
-    let provider = this.providers.get(roomId);
+    try {
+      let provider = this.providers.get(roomId);
+      if (!provider) {
+        provider = new WebsocketProvider(roomId);
 
-    if (!provider) {
-      provider = new WebsocketProvider(roomId);
-      await this.add(roomId, provider);
+        await this.add(roomId, provider);
 
-      // TODO:
-      // 这里会比较频繁的被触发，不可能实时的保存到数据库中去，这里除了简单
-      // 的增加防抖操作外，还可以从这里保存数据到 Redis 中，然后慢慢同步到
-      // 数据库，这样做的原因是：
-      // 1.yjs是全量数据，即使一个新的用户进入后，也会通过y-websocket拿到最新的数据
-      // 2.当并发协同文档数量大的时候内存压力非常大
-      provider.onChange(
-        (update: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
-          console.log(
-            `收到房间 ${roomId} 的数据发生改变`,
-            // update,
-            origin,
-            doc
-            // tr
-          );
+        // TODO:
+        // 这里会比较频繁的被触发，不可能实时的保存到数据库中去，这里除了简单
+        // 的增加防抖操作外，还可以从这里保存数据到 Redis 中，然后慢慢同步到
+        // 数据库，这样做的原因是：
+        // 1.yjs是全量数据，即使一个新的用户进入后，也会通过y-websocket拿到最新的数据
+        // 2.当并发协同文档数量大的时候内存压力非常大
+        provider.onChange(
+          (update: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
+            console.log(
+              `收到房间 ${roomId} 的数据发生改变`,
+              // update,
+              origin,
+              doc
+              // tr
+            );
 
-          // origin参数，如果本次操作是自己产生的它的值是一个Symbol(slate-yjs-operation)，如果是接收到其他客户端的值
-          // 那它的值是改变产生的那个客户端的 WebsocketProvider实例
+            // origin参数，如果本次操作是自己产生的它的值是一个Symbol(slate-yjs-operation)，如果是接收到其他客户端的值
+            // 那它的值是改变产生的那个客户端的 WebsocketProvider实例
+            if (typeof origin !== "symbol") {
+              // Transform Uint8Array to a Base64-String
+              const base64Encoded = fromUint8Array(update);
+              provider!.saveToDb(roomId, base64Encoded);
+            }
+          }
+        );
+      }
 
-          // Transform Uint8Array to a Base64-String
-          const base64Encoded = fromUint8Array(update);
-          provider!.saveToDb(roomId, base64Encoded);
-        }
-      );
+      return provider;
+    } catch (error) {
+      console.log("创建provider实例失败", error);
+      throw error;
     }
-
-    return provider;
   }
 
   public get(roomId: string) {
@@ -68,11 +74,15 @@ class WebsocketProviderManager {
       throw new Error("错误的房间号");
     }
 
-    if (this.providers.has(roomId)) {
-      const room = this.providers.get(roomId);
-      console.log(`房间${roomId}已存在`, room);
-      return room;
-    } else {
+    try {
+      if (this.providers.has(roomId)) {
+        const room = this.providers.get(roomId);
+        console.log(`房间${roomId}已存在`, room);
+        return room;
+      } else {
+        this.providers.set(roomId, provider);
+      }
+
       // 如果不存在那需要去数据库中获取文档的内容
       const res = await getFiles({
         guid: roomId,
@@ -83,17 +93,39 @@ class WebsocketProviderManager {
         // Transform Base64-String back to an Uint8Array
         const binaryEncoded = toUint8Array(base64Encoded);
 
-        // Applies Uint8Array data to document
-        Y.applyUpdate(provider.ydoc, binaryEncoded);
+        if (binaryEncoded.length) {
+          // Applies Uint8Array data to document
+          Y.applyUpdate(provider.ydoc, binaryEncoded);
+        }
       }
 
-      this.providers.set(roomId, provider);
       return provider;
+    } catch (error) {
+      throw error;
     }
   }
 
   public removeProvider(roomId: string) {
     this.providers.delete(roomId);
+  }
+
+  /**
+   * 清空所有y-websocket实例，并且清空当前服务器内存中的ydoc缓存数据，不会清空持久化到数据库的数据
+   * 注意：执行该操作后因为服务端所有的provider都被销毁了，所以此操作会直接影响客户端的内容显示和操作
+   * 但是用户刷新页面后会重新链接并从数据库获取持久化的数据
+   */
+  public clear() {
+    console.log("清空providers");
+    this.providers.forEach((provider: WebsocketProvider) => {
+      // 清除ydoc的数据
+      provider.ydoc.destroy();
+
+      // 销毁y-websocket实例
+      provider.destroy();
+    });
+
+    // 清空内存中缓存的providers
+    this.providers.clear();
   }
 }
 
