@@ -38,7 +38,7 @@ class WebsocketProviderManager {
             console.log(
               `收到房间 ${roomId} 的数据发生改变`,
               // update,
-              origin,
+              // origin,
               doc
               // tr
             );
@@ -68,6 +68,17 @@ class WebsocketProviderManager {
 
     return this.providers.get(roomId);
   }
+  public all() {
+    const rooms = Array.from(this.providers.entries());
+    return rooms.map((item) => {
+      return {
+        [item[0]]: {
+          operations: item[1].operations,
+          ydoc: item[1].ydoc,
+        },
+      };
+    });
+  }
 
   public async add(roomId: string, provider: WebsocketProvider) {
     if (!roomId) {
@@ -88,11 +99,12 @@ class WebsocketProviderManager {
         guid: roomId,
       });
 
-      if (res.data.data && res.data.data.length) {
-        const base64Encoded = res.data.data[0].dataValues.content;
+      if (res.data.items && res.data.items.length) {
+        const base64Encoded = res.data.items[0].dataValues.content;
         // Transform Base64-String back to an Uint8Array
         const binaryEncoded = toUint8Array(base64Encoded);
 
+        console.log("当前文档数据库中的初始值", binaryEncoded);
         if (binaryEncoded.length) {
           // Applies Uint8Array data to document
           Y.applyUpdate(provider.ydoc, binaryEncoded);

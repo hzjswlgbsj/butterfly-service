@@ -18,16 +18,25 @@ const AUTH_ADMIN = 16;
 router.post("/entry", async (ctx: Context) => {
   const v = await new RoomIdValidator().validate(ctx);
 
-  // 获取文章ID参数
   const roomId = v.get("body.roomId");
   try {
     console.log("激活进入一篇文档", roomId);
     await roomManager.createProvider(roomId);
-    // 返回房间ID给客户端或其他逻辑
     ctx.response.status = 200;
     ctx.body = res.json(roomId);
   } catch (error) {
     ctx.body = res.fail("激活失败");
+  }
+});
+
+router.post("/list", async (ctx: Context) => {
+  try {
+    const data = await roomManager.all();
+    // 返回房间ID给客户端或其他逻辑
+    ctx.response.status = 200;
+    ctx.body = res.json(data);
+  } catch (error) {
+    ctx.body = res.fail("获取失败");
   }
 });
 

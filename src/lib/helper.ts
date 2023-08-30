@@ -1,9 +1,10 @@
 export default class Resolve {
-  fail(err = {}, msg = "操作失败", errorCode = 10001) {
+  fail(err: any, msg = "操作失败", errorCode = 10001) {
     return {
       msg,
       err,
       errorCode,
+      state: -1,
     };
   }
 
@@ -19,8 +20,8 @@ export default class Resolve {
     return {
       code,
       msg,
-      errorCode,
       data,
+      state: 1,
     };
   }
 }

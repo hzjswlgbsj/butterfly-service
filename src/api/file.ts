@@ -94,21 +94,21 @@ export async function update(ctx: Context) {
  * 获取文件列表
  */
 export async function getFiles(filter: FileGetReq) {
-  // 更新文章
-  const [err, data] = await FileDao.get(filter);
-  if (!err) {
+  try {
+    const data = await FileDao.get(filter);
+
     return {
       code: 200,
       msg: "获取文章成功",
       errorCode: 0,
       data,
     };
-  } else {
+  } catch (error) {
     return {
-      code: -1,
-      msg: err,
+      state: -1,
+      msg: "err",
+      error,
       errorCode: 1,
-      data,
     };
   }
 }
@@ -142,13 +142,13 @@ export async function list(ctx: Context) {
     filter.limit = limit;
   }
 
-  // 更新文章
-  const [err, data] = await FileDao.get(filter);
-  if (!err) {
+  try {
+    const data = await FileDao.get(filter);
+
     ctx.response.status = 200;
     ctx.body = res.json(data);
-  } else {
-    ctx.body = res.fail(err);
+  } catch (error) {
+    ctx.body = res.fail(error);
   }
 }
 

@@ -68,7 +68,7 @@ export default class FileDao {
     }
   }
 
-  static async get(params: FileGetReq): Promise<[any, any]> {
+  static async get(params: FileGetReq): Promise<any> {
     const { id, guid, type, limit = 10, page = 1 } = params;
 
     // 筛选方式
@@ -88,40 +88,30 @@ export default class FileDao {
       filter.type = type;
     }
 
-    try {
-      const { count, rows } = await FileModel.findAndCountAll({
-        limit,
-        offset: (page - 1) * limit,
-        where: {
-          ...filter,
-          deleted_at: null,
-        },
-        // attributes: [
-        //   "id",
-        //   "name",
-        //   "type",
-        //   "content",
-        //   "guid",
-        //   "created_at",
-        //   "updated_at",
-        // ],
-        order: [["created_at", "DESC"]],
-      });
+    const { count, rows } = await FileModel.findAndCountAll({
+      limit,
+      offset: (page - 1) * limit,
+      where: {
+        ...filter,
+        deleted_at: null,
+      },
+      // attributes: [
+      //   "id",
+      //   "name",
+      //   "type",
+      //   "content",
+      //   "guid",
+      //   "created_at",
+      //   "updated_at",
+      // ],
+      order: [["created_at", "DESC"]],
+    });
 
-      const data = {
-        data: rows,
-        // 分页信息
-        meta: {
-          current_page: page,
-          per_page: limit,
-          total: count,
-          total_pages: Math.ceil(count / limit),
-        },
-      };
+    const data = {
+      items: rows,
+      total: count,
+    };
 
-      return [null, data];
-    } catch (err) {
-      return [err, {}];
-    }
+    return data;
   }
 }

@@ -59,6 +59,16 @@ FileModel.init(
         );
       },
     },
+    author: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      comment: "作者、创建者",
+    },
+    updater: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      comment: "最新更新者",
+    },
   },
   {
     sequelize,
