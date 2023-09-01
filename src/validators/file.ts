@@ -18,6 +18,14 @@ export class PositiveIdParamsValidator extends LinValidator {
 
   constructor() {
     super();
-    this.id = [new Rule("isInt", "文章ID需要正整数", { min: 1 })];
+    this.id = [new Rule("isInt", "文件ID需要正整数", { min: 1 })];
+  }
+}
+export class PositiveGuidParamsValidator extends LinValidator {
+  public guid: Rule[];
+
+  constructor() {
+    super();
+    this.guid = [new Rule("isLength", "文件唯一标识guid必传")];
   }
 }

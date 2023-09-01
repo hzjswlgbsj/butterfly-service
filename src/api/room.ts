@@ -11,11 +11,11 @@ const router = new Router({
 });
 
 const AUTH_ADMIN = 16;
+
 /**
  * 激活进入一篇文档
  */
-// router.post("/entry", new Auth(AUTH_ADMIN).m, async (ctx: Context) => {
-router.post("/entry", async (ctx: Context) => {
+export async function entry(ctx: Context) {
   const v = await new RoomIdValidator().validate(ctx);
 
   const roomId = v.get("body.roomId");
@@ -27,9 +27,11 @@ router.post("/entry", async (ctx: Context) => {
   } catch (error) {
     ctx.body = res.fail("激活失败");
   }
-});
-
-router.post("/list", async (ctx: Context) => {
+}
+/**
+ * 获取当前被激活的房间列表
+ */
+export async function list(ctx: Context) {
   try {
     const data = await roomManager.all();
     // 返回房间ID给客户端或其他逻辑
@@ -38,6 +40,9 @@ router.post("/list", async (ctx: Context) => {
   } catch (error) {
     ctx.body = res.fail("获取失败");
   }
-});
+}
+
+router.post("/list", /*new Auth(AUTH_ADMIN).m,*/ list);
+router.post("/entry", /*new Auth(AUTH_ADMIN).m,*/ entry);
 
 export default router;

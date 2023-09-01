@@ -2,6 +2,7 @@ import { Context } from "koa";
 import Router from "koa-router";
 import {
   FileAddValidator,
+  PositiveGuidParamsValidator,
   PositiveIdParamsValidator,
 } from "../validators/file";
 import { nanoid } from "nanoid";
@@ -152,8 +153,36 @@ export async function list(ctx: Context) {
   }
 }
 
+/**
+ * 获取文件详情，文件详情复杂后会分表，这里需要做数据组合
+ */
+export async function detail(ctx: Context) {
+  const v = await new PositiveGuidParamsValidator().validate(ctx);
+
+  const filter: FileGetReq = {};
+
+  const guid = v.get("body.guid");
+
+  if (guid) {
+    filter.guid = guid;
+  }
+
+  try {
+    const { items } = await FileDao.get(filter);
+    if (items.length > 0) {
+      ctx.response.status = 200;
+      ctx.body = res.json(items[0].dataValues);
+    } else {
+      ctx.body = res.fail({}, "文件不存在");
+    }
+  } catch (error) {
+    ctx.body = res.fail(error);
+  }
+}
+
 router.post("/add", /*new Auth(AUTH_ADMIN).m,*/ add);
 router.post("/update", /*new Auth(AUTH_ADMIN).m,*/ update);
 router.post("/list", /*new Auth(AUTH_ADMIN).m,*/ list);
+router.post("/detail", /*new Auth(AUTH_ADMIN).m,*/ detail);
 
 export default router;

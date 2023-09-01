@@ -68,6 +68,7 @@ class WebsocketProviderManager {
 
     return this.providers.get(roomId);
   }
+
   public all() {
     const rooms = Array.from(this.providers.entries());
     return rooms.map((item) => {
