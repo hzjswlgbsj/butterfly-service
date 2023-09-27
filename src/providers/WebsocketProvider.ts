@@ -42,7 +42,7 @@ export default class WebsocketProvider {
   async saveToDb(roomId: string, ydocJson: string) {
     try {
       await updateContentByGuid(roomId, ydocJson);
-      console.log("文件内容已经更新到数据库");
+      console.log("文件内容已经更新到数据库", roomId, ydocJson);
     } catch (error) {
       console.log("文件内容更新到数据库失败", error);
     }

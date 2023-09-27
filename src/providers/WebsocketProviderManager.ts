@@ -22,6 +22,7 @@ class WebsocketProviderManager {
   public async createProvider(roomId: string) {
     try {
       let provider = this.providers.get(roomId);
+
       if (!provider) {
         provider = new WebsocketProvider(roomId);
 
@@ -37,7 +38,7 @@ class WebsocketProviderManager {
           (update: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
             console.log(
               `收到房间 ${roomId} 的数据发生改变`,
-              // update,
+              update,
               // origin,
               doc
               // tr
@@ -48,6 +49,9 @@ class WebsocketProviderManager {
             if (typeof origin !== "symbol") {
               // Transform Uint8Array to a Base64-String
               const base64Encoded = fromUint8Array(update);
+
+              // 将增量更新应用到文档中
+              Y.applyUpdate(provider!.ydoc, update);
               provider!.saveToDb(roomId, base64Encoded);
             }
           }
@@ -95,7 +99,7 @@ class WebsocketProviderManager {
         this.providers.set(roomId, provider);
       }
 
-      // 如果不存在那需要去数据库中获取文档的内容
+      // 去数据库中获取文档的内容
       const res = await getFiles({
         guid: roomId,
       });
