@@ -2,7 +2,7 @@ import schedule from "node-schedule";
 import { nanoid } from "nanoid";
 
 interface ScheduledTask {
-  id: string; // 任务的唯一标识
+  id?: string; // 任务的唯一标识
   roomId: string; // 文档房间号
   clientId: string; // 客户端标识
   userInfo: UserInfo; // 用户信息

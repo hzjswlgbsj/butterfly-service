@@ -11,7 +11,6 @@ import { getFiles } from "../api/file";
  * 3.定期清理不活跃的文档
  * 4.使用缓存
  */
-
 class WebsocketProviderManager {
   private providers: Map<string, WebsocketProvider>;
 
@@ -28,12 +27,6 @@ class WebsocketProviderManager {
 
         await this.add(roomId, provider);
 
-        // TODO:
-        // 这里会比较频繁的被触发，不可能实时的保存到数据库中去，这里除了简单
-        // 的增加防抖操作外，还可以从这里保存数据到 Redis 中，然后慢慢同步到
-        // 数据库，这样做的原因是：
-        // 1.yjs是全量数据，即使一个新的用户进入后，也会通过y-websocket拿到最新的数据
-        // 2.当并发协同文档数量大的时候内存压力非常大
         provider.onChange(
           (update: Uint8Array, origin: any, doc: Y.Doc, tr: Y.Transaction) => {
             console.log(
@@ -50,9 +43,8 @@ class WebsocketProviderManager {
               // Transform Uint8Array to a Base64-String
               const base64Encoded = fromUint8Array(update);
 
-              // 将增量更新应用到文档中
-              Y.applyUpdate(provider!.ydoc, update);
-              provider!.saveToDb(roomId, base64Encoded);
+              console.log("收到改变，增量数据为", base64Encoded);
+              // provider!.saveToDb(roomId, base64Encoded);
             }
           }
         );
