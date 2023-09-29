@@ -1,6 +1,6 @@
 import * as Y from "yjs";
 import WebsocketProvider from "./WebsocketProvider";
-import { fromUint8Array, toUint8Array } from "js-base64";
+import { toUint8Array } from "js-base64";
 import { getFiles } from "../api/file";
 /**
  * TODO:
@@ -37,15 +37,16 @@ class WebsocketProviderManager {
               // tr
             );
 
+            // 该更新方案废除，使用定时任务自动数据持久化
             // origin参数，如果本次操作是自己产生的它的值是一个Symbol(slate-yjs-operation)，如果是接收到其他客户端的值
             // 那它的值是改变产生的那个客户端的 WebsocketProvider实例
-            if (typeof origin !== "symbol") {
-              // Transform Uint8Array to a Base64-String
-              const base64Encoded = fromUint8Array(update);
+            // if (typeof origin !== "symbol") {
+            //   // Transform Uint8Array to a Base64-String
+            //   const base64Encoded = fromUint8Array(update);
 
-              console.log("收到改变，增量数据为", base64Encoded);
-              // provider!.saveToDb(roomId, base64Encoded);
-            }
+            //   console.log("收到改变，增量数据为", base64Encoded);
+            //   // provider!.saveToDb(roomId, base64Encoded);
+            // }
           }
         );
       }

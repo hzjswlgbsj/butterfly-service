@@ -4,11 +4,11 @@ import { nanoid } from "nanoid";
 interface ScheduledTask {
   id?: string; // 任务的唯一标识
   roomId: string; // 文档房间号
-  clientId: string; // 客户端标识
+  clientId?: string; // 客户端标识
   userInfo: UserInfo; // 用户信息
   intervalInMinutes: number; // 时间间隔（以分钟为单位）
   task: () => void; // 任务函数
-  job: schedule.Job | null; // 任务的 node-schedule Job 对象
+  job?: schedule.Job | null; // 任务的 node-schedule Job 对象
 }
 
 interface UserInfo {

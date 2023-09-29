@@ -5,12 +5,14 @@ import { OP } from "../types";
 import ws from "ws";
 import { updateContentByGuid } from "../api/file";
 import Scheduler from "../lib/schedule";
+import { fromUint8Array } from "js-base64";
 
 export default class WebsocketProvider {
   public ydoc: Y.Doc;
+  public operations: Y.XmlText;
+  public canSaveDataToDbTask: boolean = false;
   private provider: YWebsocketProvider;
   private todoUndoManager: Y.UndoManager;
-  private operations: Y.XmlText;
   private scheduler: Scheduler;
 
   constructor(roomId: string) {
@@ -18,17 +20,17 @@ export default class WebsocketProvider {
 
     // 增加数据持久化定时任务
     this.scheduler = new Scheduler();
+
     // 添加任务
     this.scheduler.addTask({
       roomId, // 房间号
-      clientId: "client-1", // 客户端标识
       userInfo: {
-        userId: "user-123",
-        userName: "John Doe",
+        userId: "sixty", // 暂时没有用户系统使用测试
+        userName: "sixty", // 暂时没有用户系统使用测试
       },
       intervalInMinutes: 1, // 任务执行间隔，以分钟为单位
       task: () => {
-        console.log("定时任务执行");
+        console.log("定时任务执行，开始执行数据持久化");
         this.saveToDb(roomId);
       },
     });
@@ -55,14 +57,21 @@ export default class WebsocketProvider {
       tr: Y.Transaction
     ) => void
   ) {
-    this.provider.doc.on("update", callback);
+    if (!this.canSaveDataToDbTask) {
+      this.canSaveDataToDbTask = true;
+      this.scheduler.runAllTasks();
+    }
+    this.ydoc.on("update", callback);
   }
 
   async saveToDb(roomId: string) {
     try {
-      let ydocJson: any = this.provider.doc;
-      await updateContentByGuid(roomId, ydocJson);
-      console.log("文件内容已经更新到数据库", roomId, ydocJson);
+      const documentState = Y.encodeStateAsUpdate(this.ydoc); // is a Uint8Array
+      // Transform Uint8Array to a Base64-String
+      const base64Encoded = fromUint8Array(documentState);
+
+      await updateContentByGuid(roomId, base64Encoded);
+      console.log("文件内容已经更新到数据库", roomId, base64Encoded);
     } catch (error) {
       console.log("文件内容更新到数据库失败", error);
     }
