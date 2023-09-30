@@ -1,7 +1,6 @@
 import * as Y from "yjs";
 import { WebsocketProvider as YWebsocketProvider } from "y-websocket"; // 这个包的类型有问题
 import { WEBSOCKET_URL } from "../../config";
-import { OP } from "../types";
 import ws from "ws";
 import { updateContentByGuid } from "../api/file";
 import Scheduler from "../lib/schedule";
@@ -28,7 +27,7 @@ export default class WebsocketProvider {
         userId: "sixty", // 暂时没有用户系统使用测试
         userName: "sixty", // 暂时没有用户系统使用测试
       },
-      intervalInMinutes: 1, // 任务执行间隔，以分钟为单位
+      intervalInMinutes: 5, // 任务执行间隔，以分钟为单位
       task: () => {
         console.log("定时任务执行，开始执行数据持久化");
         this.saveToDb(roomId);
